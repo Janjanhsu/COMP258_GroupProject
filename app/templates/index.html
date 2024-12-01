@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Prediction</title>
+</head>
+<body>
+    <h1>Image Prediction</h1>
+    <h3>Upload an image or open your camera</h3>
+
+    <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <button type="submit">Upload Image</button>
+    </form>
+
+    <video id="video" width="480" height="480" autoplay></video>
+    <button id="capture-button">Capture Image</button>
+    <canvas id="canvas" width="480" height="480" style="display:none;"></canvas>
+
+    <script>
+        // Get access to the camera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                document.getElementById('video').srcObject = stream;
+            })
+            .catch(function(error) {
+                console.error('Error accessing camera:', error);
+            });
+
+        // Capture the image
+        document.getElementById('capture-button').addEventListener('click', function() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+
+            // Draw the video frame to the canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert the canvas image to a data URL
+            const dataURL = canvas.toDataURL('image/jpg');
+
+            // Send the data URL to the server
+            fetch('/capture', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image: dataURL })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle the server's response (e.g., display the prediction)
+                const result = document.createElement('h3');
+                result.textContent = `Prediction: ${data.prediction}`;
+                document.body.appendChild(result);
+            })
+            .catch(error => {
+                console.error('Error sending image to server:', error);
+            });
+        });
+    </script>
+</body>
+</html>
