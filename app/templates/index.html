@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -12,10 +11,12 @@
         <input type="file" name="file">
         <button type="submit">Upload Image</button>
     </form>
+    <div id="prediction-result"></div>
 
     <video id="video" width="480" height="480" autoplay></video>
     <button id="capture-button">Capture Image</button>
     <canvas id="canvas" width="480" height="480" style="display:none;"></canvas>
+
 
     <script>
         // Get access to the camera
@@ -47,15 +48,38 @@
                 },
                 body: JSON.stringify({ image: dataURL })
             })
-            .then(response => response.json())
+            .then(response => response.text())
             .then(data => {
                 // Handle the server's response (e.g., display the prediction)
                 const result = document.createElement('h3');
-                result.textContent = `Prediction: ${data.prediction}`;
-                document.body.appendChild(result);
+                result.innerHTML = data;
+                document.getElementById('prediction-result').innerHTML = '';
+                document.getElementById('prediction-result').appendChild(result);
             })
             .catch(error => {
                 console.error('Error sending image to server:', error);
+            });
+        });
+
+        // Handle the form submission for image upload
+        document.getElementById('upload-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                // Display the prediction result
+                const result = document.createElement('h3');
+                result.innerHTML = data;
+                document.getElementById('prediction-result').innerHTML = '';
+                document.getElementById('prediction-result').appendChild(result);
+            })
+            .catch(error => {
+                console.error('Error uploading image:', error);
             });
         });
     </script>

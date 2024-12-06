@@ -23,6 +23,7 @@ def upload():
     file = request.files['file']
     image = Image.open(file.stream)
     prediction = predict_image(image)
+    print("Upload prediction: ", prediction)
     return f'Prediction: {prediction}'
 
 @app.route('/capture', methods=['POST'])
@@ -31,6 +32,7 @@ def capture():
     image_data = base64.b64decode(data['image'].split(',')[1])
     image = Image.open(io.BytesIO(image_data))
     prediction = predict_image(image)
+    print("Capture prediction: ", prediction)
     return f'Prediction: {prediction}'
 
 
