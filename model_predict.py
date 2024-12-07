@@ -10,7 +10,7 @@ import cv2
 
 
 # Load your trained model
-model_file = "my_model.keras"
+model_file = "app/my_model.keras"
 model = load_model(model_file)
 
 # Define emotion class labels
