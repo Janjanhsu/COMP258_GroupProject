@@ -34,7 +34,7 @@ train_data = keras.utils.image_dataset_from_directory(
     labels = 'inferred',
     label_mode = 'int',
     batch_size = 120,
-    image_size = (224, 224)
+    image_size = (48, 48)
 )
 
 validation_data = keras.utils.image_dataset_from_directory(
@@ -42,7 +42,7 @@ validation_data = keras.utils.image_dataset_from_directory(
     labels = 'inferred',
     label_mode = 'int',
     batch_size = 120,
-    image_size = (224, 224)
+    image_size = (48, 48)
 )
 
 '''
