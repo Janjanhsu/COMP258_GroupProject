@@ -17,7 +17,12 @@ model = load_model('my_model.keras')
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    user_agent = request.headers.get('User-Agent')
+    print('user_agent: ', user_agent)
+    if user_agent.find("Firefox") > -1:
+      return render_template('index_firefox.html')
+    else:
+      return render_template('index_safari.html')
 
 class_names = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
 class_emoji = ['😡','😓','😱','😁','🙂','😭','😮']

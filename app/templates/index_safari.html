@@ -1,0 +1,56 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Emotion Detection</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<table class="center">
+<tr><td>
+    <img src="/static/logo.jpeg" width="300" />
+    <h1>Emotion Detection</h1>
+    <h3>Upload an image or open your camera.</h3>
+
+    <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+        <input class="button-3" type="file" name="file" required>
+        <button class="button-3" type="submit">Upload Image</button>
+    </form>
+    <button class="button-19" id="capture-button" onClick="takePhoto()">📷Capture Image</button>
+    <div id="prediction-result"> </div>
+  <div class="photobooth">
+    <canvas width="480" height="480" class="photo"></canvas>
+    <video hidden class="player"></video>
+    <div class="strip"></div>
+  </div>
+
+  <audio class="snap" src="./snap.mp3" hidden></audio>
+
+  <script src="/static/script.js"></script>
+
+    <script>
+        // Handle the form submission for image upload
+        document.getElementById('upload-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                // Display the prediction result
+                const result = document.createElement('h3');
+                result.innerHTML = data;
+                document.getElementById('prediction-result').innerHTML = '';
+                document.getElementById('prediction-result').appendChild(result);
+            })
+            .catch(error => {
+                console.error('Error uploading image:', error);
+            });
+        });
+    </script>
+</td></tr>
+</table>
+</body>
+</html>
