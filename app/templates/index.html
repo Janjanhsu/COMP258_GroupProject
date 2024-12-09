@@ -2,19 +2,23 @@
 <head>
     <meta charset="UTF-8">
     <title>Image Prediction</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Image Prediction</h1>
+<table class="center">
+<tr><td>
+    <img src="/static/logo.jpeg" width="300" />
+    <h1>Emotion Detection</h1>
     <h3>Upload an image or open your camera</h3>
 
     <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <button type="submit">Upload Image</button>
+        <input class="button-3" type="file" name="file" required>
+        <button class="button-3" type="submit">Upload Image</button>
     </form>
-    <div id="prediction-result"></div>
-
+    <button class="button-19" id="capture-button">📷Capture Image</button>
+    <div id="prediction-result"> </div>
     <video id="video" width="480" height="480" autoplay></video>
-    <button id="capture-button">Capture Image</button>
+    
     <canvas id="canvas" width="480" height="480" style="display:none;"></canvas>
 
 
@@ -83,5 +87,7 @@
             });
         });
     </script>
+</td></tr>
+</table>
 </body>
 </html>
