@@ -3,6 +3,8 @@
     <meta charset="UTF-8">
     <title>Emotion Detection</title>
     <link rel="stylesheet" href="/static/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Added for responsiveness -->
+    <script src="/static/qrious.min.js"></script><!-- Ensure QRious is loaded -->
 </head>
 <body>
 <table class="center">
@@ -18,6 +20,7 @@
     <button class="button-19" id="capture-button" onClick="takePhoto()">📷Capture Image</button>
     <div id="prediction-result"> </div>
   <div class="photobooth">
+  <div id="loading-message" style="display: none;">Processing...</div>
     <canvas width="480" height="480" class="photo"></canvas>
     <video hidden class="player"></video>
     <div class="strip"></div>
@@ -25,12 +28,45 @@
 
   <audio class="snap" src="/static/snap.mp3" hidden></audio>
 
+  <div class="qr-code-section">
+        <h3>Scan to Access Website:</h3>
+        <canvas id="qr-code" width="200" height="200"></canvas> <!-- QR code canvas element -->
+        <p>If the QR code does not display, reload the page or use another browser.</p>
+    </div>
+    <div class="use-case-section">
+        <h3>Use Cases</h3>
+        <ul>
+            <li>Emotion-based personalized marketing.</li>
+            <li>Remote therapy sessions to assess emotional well-being.</li>
+            <li>Security applications for identifying distress signals in surveillance.</li>
+        </ul>
+    </div>
+
   <script src="/static/script.js"></script>
 
     <script>
+        // Ensure QRious is loaded and then generate the QR code
+        const qrCanvas = document.getElementById('qr-code');
+        if (qrCanvas && typeof QRious === 'function') {
+            const qr = new QRious({
+                element: qrCanvas,
+                value: window.location.href, // Set the URL of the current page
+                size: 200 // Specify the size of the QR code
+            });
+        } else {
+            console.error('QRious library or canvas element is missing.');
+        }
+
+        const loadingMessage = document.getElementById('loading-message');
+
+        function toggleLoading(show) {
+            loadingMessage.style.display = show ? 'block' : 'none';
+        }
+              
         // Handle the form submission for image upload
         document.getElementById('upload-form').addEventListener('submit', function(event) {
             event.preventDefault();
+            toggleLoading(true);
             const formData = new FormData(this);
 
             fetch('/upload', {
@@ -39,6 +75,7 @@
             })
             .then(response => response.text())
             .then(data => {
+                toggleLoading(false);
                 // Display the prediction result
                 const result = document.createElement('h3');
                 result.innerHTML = data;
@@ -46,7 +83,9 @@
                 document.getElementById('prediction-result').appendChild(result);
             })
             .catch(error => {
+                toggleLoading(false);
                 console.error('Error uploading image:', error);
+                alert('Image upload failed. Please try again.');
             });
         });
     </script>

@@ -67,6 +67,8 @@ function takePhoto() {
   // played the sound
   snap.currentTime = 0;
   snap.play();
+  
+  toggleLoading(true);
 
   // take the data out of the canvas
   const dataURL = canvas.toDataURL('image/jpeg');
@@ -80,6 +82,7 @@ function takePhoto() {
   })
   .then(response => response.text())
   .then(data => {
+      toggleLoading(false);
       // Handle the server's response (e.g., display the prediction)
       const result = document.createElement('h3');
       result.innerHTML = data;
@@ -87,7 +90,9 @@ function takePhoto() {
       document.getElementById('prediction-result').appendChild(result);
   })
   .catch(error => {
+      toggleLoading(false);
       console.error('Error sending image to server:', error);
+      alert('Image upload failed. Please try again.');
   });
 }
 

@@ -1,8 +1,11 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Emotion Detection</title>
     <link rel="stylesheet" href="/static/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Added for responsiveness -->
+    <script src="/static/qrious.min.js"></script><!-- Ensure QRious is loaded -->
 </head>
 <body>
     <table class="center">
@@ -16,65 +19,91 @@
                 <button class="button-3" type="submit">Upload Image</button>
             </form>
             <button class="button-19" id="capture-button">📷Capture Image</button>
-            <div id="prediction-result"> </div>
+            <div id="prediction-result"></div>
+            <div id="loading-message" style="display: none;">Processing...</div>
             <video id="video" width="480" height="480" autoplay></video>
-
             <canvas id="canvas" width="480" height="480" style="display:none;"></canvas>
 
+            <div class="qr-code-section">
+                <h3>Scan to Access Website:</h3>
+                <canvas id="qr-code" width="200" height="200"></canvas> <!-- Set explicit width and height -->
+                <p>If the QR code does not display, reload the page or use another browser.</p>
+            </div>
+
+            <div class="use-case-section">
+                <h3>Use Cases</h3>
+                <ul>
+                    <li>Emotion-based personalized marketing.</li>
+                    <li>Remote therapy sessions to assess emotional well-being.</li>
+                    <li>Security applications for identifying distress signals in surveillance.</li>
+                </ul>
+            </div>
+
             <script>
-                // Function to request camera access, handling Firefox's specific requirements
+                // Ensure QRious is loaded and then generate the QR code
+                const qrCanvas = document.getElementById('qr-code');
+                if (qrCanvas && typeof QRious === 'function') {
+                    const qr = new QRious({
+                        element: qrCanvas,
+                        value: window.location.href,
+                        size: 200 // Specify the size of the QR code
+                    });
+                } else {
+                    console.error('QRious library or canvas element is missing.');
+                }
+
+                const loadingMessage = document.getElementById('loading-message');
+
+                function toggleLoading(show) {
+                    loadingMessage.style.display = show ? 'block' : 'none';
+                }
+
                 function requestCameraAccess() {
                     return navigator.mediaDevices.getUserMedia({ video: true })
                         .catch(error => {
-                            // Handle permission denied or other errors
                             console.error('Error accessing camera:', error);
                             alert('Please allow camera access to use this feature.');
                             return Promise.reject(error);
                         });
                 }
 
-                // Get access to the camera
                 requestCameraAccess()
                     .then(function(stream) {
                         document.getElementById('video').srcObject = stream;
                     });
 
-                // Capture the image
                 document.getElementById('capture-button').addEventListener('click', function() {
+                    toggleLoading(true);
                     const video = document.getElementById('video');
                     const canvas = document.getElementById('canvas');
                     const context = canvas.getContext('2d');
-
-                    // Draw the video frame to the canvas
                     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                    // Convert the canvas image to a data URL
                     const dataURL = canvas.toDataURL('image/jpg');
 
-                    // Send the data URL to the server
                     fetch('/capture', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ image: dataURL })
                     })
                     .then(response => response.text())
                     .then(data => {
-                        // Handle the server's response (e.g., display the prediction)
+                        toggleLoading(false);
                         const result = document.createElement('h3');
                         result.innerHTML = data;
                         document.getElementById('prediction-result').innerHTML = '';
                         document.getElementById('prediction-result').appendChild(result);
                     })
                     .catch(error => {
+                        toggleLoading(false);
                         console.error('Error sending image to server:', error);
+                        alert('Failed to process image. Please try again.');
                     });
                 });
 
-                // Handle the form submission for image upload
                 document.getElementById('upload-form').addEventListener('submit', function(event) {
                     event.preventDefault();
+                    toggleLoading(true);
                     const formData = new FormData(this);
 
                     fetch('/upload', {
@@ -83,14 +112,16 @@
                     })
                     .then(response => response.text())
                     .then(data => {
-                        // Display the prediction result
+                        toggleLoading(false);
                         const result = document.createElement('h3');
                         result.innerHTML = data;
                         document.getElementById('prediction-result').innerHTML = '';
                         document.getElementById('prediction-result').appendChild(result);
                     })
                     .catch(error => {
+                        toggleLoading(false);
                         console.error('Error uploading image:', error);
+                        alert('Image upload failed. Please try again.');
                     });
                 });
             </script>
